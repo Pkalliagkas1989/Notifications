@@ -12,13 +12,11 @@ import (
 
 // ReactionHandler handles like/dislike reactions
 type ReactionHandler struct {
-	Repo             *repository.ReactionRepository
-	PostRepo         *repository.PostRepository
-	NotificationRepo *repository.NotificationRepository
+	Repo *repository.ReactionRepository
 }
 
-func NewReactionHandler(repo *repository.ReactionRepository, pRepo *repository.PostRepository, nRepo *repository.NotificationRepository) *ReactionHandler {
-	return &ReactionHandler{Repo: repo, PostRepo: pRepo, NotificationRepo: nRepo}
+func NewReactionHandler(repo *repository.ReactionRepository) *ReactionHandler {
+	return &ReactionHandler{Repo: repo}
 }
 
 // React toggles a reaction on a post or comment for the authenticated user
@@ -50,20 +48,9 @@ func (h *ReactionHandler) CreateReact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oldReact, _ := h.Repo.GetReaction(user.ID, req.TargetType, req.TargetID)
 	if err := h.Repo.ToggleReaction(user.ID, req.TargetType, req.TargetID, req.ReactionType); err != nil {
 		utils.ErrorResponse(w, "Failed to react", http.StatusInternalServerError)
 		return
-	}
-	newReact, _ := h.Repo.GetReaction(user.ID, req.TargetType, req.TargetID)
-	if req.TargetType == "post" && newReact > 0 && newReact != oldReact {
-		if postAuthor, err := h.PostRepo.GetPostAuthor(req.TargetID); err == nil && postAuthor != user.ID {
-			h.NotificationRepo.Create(models.Notification{
-				UserID: postAuthor,
-				Type:   map[int]string{1: "like", 2: "dislike"}[newReact],
-				PostID: req.TargetID,
-			})
-		}
 	}
 
 	var (
