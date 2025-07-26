@@ -192,6 +192,7 @@ func (r *PostRepository) GetCategoriesByPostID(postID string) ([]models.Category
 // 	return posts, nil
 // }
 
+
 func (r *PostRepository) GetPostsReactedByUser(userID string) ([]models.PostWithUser, error) {
 	query := `
 		SELECT DISTINCT p.post_id, p.user_id, u.username, p.title, p.content, p.created_at
@@ -341,14 +342,4 @@ func (r *PostRepository) UpdatePost(postID string, title, content *string) error
 func (r *PostRepository) SoftDeletePost(postID string) error {
 	_, err := r.db.Exec(`UPDATE posts SET title = NULL, content = NULL, updated_at = ? WHERE post_id = ?`, time.Now(), postID)
 	return err
-}
-
-// GetPostAuthor returns the user_id of the post owner
-func (r *PostRepository) GetPostAuthor(postID string) (string, error) {
-	var uid string
-	err := r.db.QueryRow(`SELECT user_id FROM posts WHERE post_id = ?`, postID).Scan(&uid)
-	if err != nil {
-		return "", err
-	}
-	return uid, nil
 }

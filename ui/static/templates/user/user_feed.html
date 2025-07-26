@@ -9,14 +9,12 @@
     <link rel="stylesheet" href="/static/css/user_feed.css" />
     <script src="/static/js/user/user_mainpage.js" type="module"></script>
     <script src="/static/js/user/user_feed.js" type="module"></script>
-    <script src="/static/js/user/user_notifications.js" type="module"></script>
     <script src="/static/js/user/create_post.js" defer></script>
   </head>
   <body>
     <nav class="navbar">
       <a class="navbar-brand" href="/user/feed">Forum</a>
       <ul class="navbar-links">
-        <li><span id="notif-bell">🔔</span></li>
         <li><a href="#" id="logout-link">Logout</a></li>
       </ul>
     </nav>
@@ -34,21 +32,9 @@
         <li class="activity-dropdown-toggle">
           My Activity <span class="dropdown-arrow">&#9662;</span>
           <ul class="activity-dropdown-content">
-            <li>
-              <a href="/user/my-activity/my-posts" id="my-posts-link"
-                >My Posts</a
-              >
-            </li>
-            <li>
-              <a href="/user/my-activity/my-comments" id="commented-posts-link"
-                >My Comments</a
-              >
-            </li>
-            <li>
-              <a href="/user/my-activity/my-reactions" id="my-reactions-link"
-                >My Reactions</a
-              >
-            </li>
+            <li><a href="/user/my-activity/my-posts" id="my-posts-link">My Posts</a></li>
+            <li><a href="/user/my-activity/my-comments" id="commented-posts-link">My Comments</a></li>
+            <li><a href="/user/my-activity/my-reactions" id="my-reactions-link">My Reactions</a></li>
           </ul>
         </li>
       </ul>
@@ -128,20 +114,6 @@
           <div id="post-category" class="checkbox-group"></div>
           <button id="submit-post">Submit</button>
         </div>
-      </div>
-    </div>
-
-    <div id="notification-modal" class="modal hidden">
-      <div class="modal-content">
-        <button
-          class="close-btn"
-          onclick="document.getElementById('notification-modal').classList.add('hidden')"
-        >
-          &times;
-        </button>
-        <ul id="notification-list"></ul>
-        <button id="read-all-btn">Read All</button>
-        <button id="delete-all-btn">Delete All</button>
       </div>
     </div>
   </body>
