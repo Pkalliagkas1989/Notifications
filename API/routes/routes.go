@@ -7,6 +7,7 @@ import (
 	"forum/handlers"
 	"forum/middleware"
 	"forum/repository"
+	"forum/repository/notification"
 	"forum/repository/session"
 	"forum/repository/user"
 )
@@ -20,6 +21,7 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	commentRepo := repository.NewCommentRepository(db)
 	reactionRepo := repository.NewReactionRepository(db)
 	imageRepo := repository.NewImageRepository(db)
+	notificationRepo := notification.NewRepository(db)
 
 	// Create handlers
 	authHandler := handlers.NewAuthHandler(userRepo, sessionRepo)
@@ -28,9 +30,10 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	postHandler := handlers.NewPostHandler(postRepo)
 	myPostsHandler := handlers.NewMyPostsHandler(postRepo, commentRepo, reactionRepo, imageRepo)
 	likedPostsHandler := handlers.NewLikedPostsHandler(postRepo, commentRepo, reactionRepo, imageRepo)
-	commentHandler := handlers.NewCommentHandler(commentRepo)
-	reactionHandler := handlers.NewReactionHandler(reactionRepo)
+	commentHandler := handlers.NewCommentHandler(commentRepo, postRepo, notificationRepo, userRepo)
+	reactionHandler := handlers.NewReactionHandler(reactionRepo, postRepo, notificationRepo, userRepo)
 	imageHandler := handlers.NewImageHandler(imageRepo)
+	notificationHandler := handlers.NewNotificationHandler(notificationRepo)
 	guestHandler := handlers.NewGuestHandler(categoryRepo, postRepo, commentRepo, reactionRepo, imageRepo)
 
 	// Create middleware
@@ -82,19 +85,26 @@ func SetupRoutes(db *sql.DB) http.Handler {
 
 	// Protected user routes
 	mux.Handle("/forum/api/posts/create", protected(http.HandlerFunc(postHandler.CreatePost)))
-	mux.Handle("/forum/api/posts/delete/", protected(http.HandlerFunc(postHandler.DeletePost))) // DELETE /forum/api/posts/delete/{id}
-	mux.Handle("/forum/api/posts/edit-title/", protected(http.HandlerFunc(postHandler.EditPostTitle))) // PUT /forum/api/posts/edit-title/{id}
+	mux.Handle("/forum/api/posts/delete/", protected(http.HandlerFunc(postHandler.DeletePost)))            // DELETE /forum/api/posts/delete/{id}
+	mux.Handle("/forum/api/posts/edit-title/", protected(http.HandlerFunc(postHandler.EditPostTitle)))     // PUT /forum/api/posts/edit-title/{id}
 	mux.Handle("/forum/api/posts/edit-content/", protected(http.HandlerFunc(postHandler.EditPostContent))) // PUT /forum/api/posts/edit-content/{id}
 	mux.Handle("/forum/api/user/posts", protected(http.HandlerFunc(myPostsHandler.GetMyPosts)))
 	mux.Handle("/forum/api/user/liked", protected(http.HandlerFunc(likedPostsHandler.GetLikedPosts)))
 	mux.Handle("/forum/api/user/disliked", protected(http.HandlerFunc(likedPostsHandler.GetDislikedPosts)))
 	mux.Handle("/forum/api/comments/create", protected(http.HandlerFunc(commentHandler.CreateComment)))
-	mux.Handle("/forum/api/comments/edit/", protected(http.HandlerFunc(commentHandler.EditComment))) // PUT /forum/api/comments/edit/{id}
+	mux.Handle("/forum/api/comments/edit/", protected(http.HandlerFunc(commentHandler.EditComment)))     // PUT /forum/api/comments/edit/{id}
 	mux.Handle("/forum/api/comments/delete/", protected(http.HandlerFunc(commentHandler.DeleteComment))) // DELETE /forum/api/comments/delete/{id}
 	mux.Handle("/forum/api/react", protected(http.HandlerFunc(reactionHandler.CreateReact)))
 	mux.Handle("/forum/api/images/upload", protected(http.HandlerFunc(imageHandler.Upload)))
 	mux.Handle("/forum/api/user/commented", protected(http.HandlerFunc(myPostsHandler.GetCommentedPosts)))
 	mux.Handle("/forum/api/images/delete/", protected(http.HandlerFunc(imageHandler.DeleteImagesByPost))) // DELETE /forum/api/images/delete/{post_id}
+
+	// Notification routes
+	mux.Handle("/forum/api/user/notifications", protected(http.HandlerFunc(notificationHandler.GetUserNotifications)))
+	mux.Handle("/forum/api/notifications/read/", protected(http.HandlerFunc(notificationHandler.MarkRead))) // POST /forum/api/notifications/read/{id}
+	mux.Handle("/forum/api/notifications/read-all", protected(http.HandlerFunc(notificationHandler.MarkAllRead)))
+	mux.Handle("/forum/api/notifications/delete/", protected(http.HandlerFunc(notificationHandler.Delete))) // DELETE /forum/api/notifications/delete/{id}
+	mux.Handle("/forum/api/notifications/delete-all", protected(http.HandlerFunc(notificationHandler.DeleteAll)))
 
 	// Additional protected routes for user management
 	mux.Handle("/forum/api/user/profile", protected(http.HandlerFunc(authHandler.GetProfile)))

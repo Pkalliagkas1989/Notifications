@@ -9,12 +9,14 @@
     <link rel="stylesheet" href="/static/css/user_feed.css" />
     <script src="/static/js/user/user_mainpage.js" type="module"></script>
     <script src="/static/js/user/user_feed.js" type="module"></script>
+    <script src="/static/js/user/notifications.js" type="module"></script>
     <script src="/static/js/user/create_post.js" defer></script>
   </head>
   <body>
     <nav class="navbar">
       <a class="navbar-brand" href="/user/feed">Forum</a>
       <ul class="navbar-links">
+        <li><span id="notif-bell" class="notif-bell">🔔</span></li>
         <li><a href="#" id="logout-link">Logout</a></li>
       </ul>
     </nav>
@@ -113,6 +115,18 @@
           <label for="post-category" class="modal-label">Categories</label>
           <div id="post-category" class="checkbox-group"></div>
           <button id="submit-post">Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="notification-modal" class="modal hidden">
+      <div class="modal-content">
+        <button class="close-btn" id="close-notifications">&times;</button>
+        <h2>Notifications</h2>
+        <div id="notif-list"></div>
+        <div class="notif-actions">
+          <button id="mark-all-read">Read All</button>
+          <button id="delete-all">Delete All</button>
         </div>
       </div>
     </div>

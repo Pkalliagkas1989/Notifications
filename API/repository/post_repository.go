@@ -13,6 +13,12 @@ type PostRepository struct {
 	db *sql.DB
 }
 
+func (r *PostRepository) GetPostOwner(postID string) (string, error) {
+	var userID string
+	err := r.db.QueryRow(`SELECT user_id FROM posts WHERE post_id = ?`, postID).Scan(&userID)
+	return userID, err
+}
+
 // checks if the legacy category_id column exists on the posts table
 func (r *PostRepository) hasLegacyCategoryColumn() bool {
 	rows, err := r.db.Query(`PRAGMA table_info(posts)`)
@@ -191,7 +197,6 @@ func (r *PostRepository) GetCategoriesByPostID(postID string) ([]models.Category
 // 	}
 // 	return posts, nil
 // }
-
 
 func (r *PostRepository) GetPostsReactedByUser(userID string) ([]models.PostWithUser, error) {
 	query := `

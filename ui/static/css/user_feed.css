@@ -178,3 +178,24 @@ body, html {
     font-size: 1em;
   }
 } 
+
+.notif-bell {
+  cursor: pointer;
+  margin-right: 1em;
+}
+.notif-bell.lit {
+  color: var(--color-accent);
+}
+
+.notification-item {
+  padding: 0.5em 0;
+  border-bottom: 1px solid var(--bg-tertiary);
+}
+.notification-item.unread {
+  font-weight: bold;
+}
+.notif-actions {
+  margin-top: 1em;
+  display: flex;
+  gap: 1em;
+}
