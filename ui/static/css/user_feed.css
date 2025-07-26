@@ -186,6 +186,20 @@ body, html {
 .notif-bell.lit {
   color: var(--color-accent);
 }
+.notif-item {
+  position: relative;
+}
+.notif-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: 50%;
+  padding: 2px 5px;
+  font-size: 0.6em;
+  line-height: 1;
+}
 
 .notification-item {
   padding: 0.5em 0;

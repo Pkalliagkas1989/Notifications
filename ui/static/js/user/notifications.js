@@ -1,6 +1,7 @@
 const bell = document.getElementById('notif-bell');
 const modal = document.getElementById('notification-modal');
 const list = document.getElementById('notif-list');
+const badge = document.getElementById('notif-count');
 const markAllBtn = document.getElementById('mark-all-read');
 const delAllBtn = document.getElementById('delete-all');
 const closeBtn = document.getElementById('close-notifications');
@@ -11,8 +12,13 @@ async function loadNotifications() {
     if (!resp.ok) throw new Error('failed');
     const data = await resp.json();
     render(data);
-    const hasUnread = data.some(n => !n.read_at && n.message);
+    const unreadCount = data.filter(n => !n.read_at && n.message).length;
+    const hasUnread = unreadCount > 0;
     bell.classList.toggle('lit', hasUnread);
+    if (badge) {
+      badge.textContent = unreadCount;
+      badge.classList.toggle('hidden', !hasUnread);
+    }
   } catch(e) { console.error(e); }
 }
 
