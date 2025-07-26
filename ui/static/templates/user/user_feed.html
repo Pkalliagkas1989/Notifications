@@ -10,11 +10,13 @@
     <script src="/static/js/user/user_mainpage.js" type="module"></script>
     <script src="/static/js/user/user_feed.js" type="module"></script>
     <script src="/static/js/user/create_post.js" defer></script>
+    <script src="/static/js/user/user_notifications.js" defer></script>
   </head>
   <body>
     <nav class="navbar">
       <a class="navbar-brand" href="/user/feed">Forum</a>
       <ul class="navbar-links">
+        <li><a href="#" id="notification-bell">🔔</a></li>
         <li><a href="#" id="logout-link">Logout</a></li>
       </ul>
     </nav>
@@ -32,9 +34,21 @@
         <li class="activity-dropdown-toggle">
           My Activity <span class="dropdown-arrow">&#9662;</span>
           <ul class="activity-dropdown-content">
-            <li><a href="/user/my-activity/my-posts" id="my-posts-link">My Posts</a></li>
-            <li><a href="/user/my-activity/my-comments" id="commented-posts-link">My Comments</a></li>
-            <li><a href="/user/my-activity/my-reactions" id="my-reactions-link">My Reactions</a></li>
+            <li>
+              <a href="/user/my-activity/my-posts" id="my-posts-link"
+                >My Posts</a
+              >
+            </li>
+            <li>
+              <a href="/user/my-activity/my-comments" id="commented-posts-link"
+                >My Comments</a
+              >
+            </li>
+            <li>
+              <a href="/user/my-activity/my-reactions" id="my-reactions-link"
+                >My Reactions</a
+              >
+            </li>
           </ul>
         </li>
       </ul>
@@ -113,6 +127,18 @@
           <label for="post-category" class="modal-label">Categories</label>
           <div id="post-category" class="checkbox-group"></div>
           <button id="submit-post">Submit</button>
+        </div>
+      </div>
+    </div>
+    <!-- Notifications Modal -->
+    <div id="notification-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="body-container">
+          <button class="close-btn">&times;</button>
+          <h2>Notifications</h2>
+          <ul id="notification-list" class="notification-list"></ul>
+          <button id="mark-all-read">Mark All Read</button>
+          <button id="delete-all">Delete All</button>
         </div>
       </div>
     </div>

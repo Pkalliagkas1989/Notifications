@@ -733,3 +733,25 @@ body {
 .activity-dropdown-toggle.open .dropdown-arrow {
   transform: rotate(180deg);
 }
+
+/* Notification bell */
+#notification-bell.has-unread::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background: red;
+  border-radius: 50%;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.notification-list li {
+  margin-bottom: 0.5em;
+}

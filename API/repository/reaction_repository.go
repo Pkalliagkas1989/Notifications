@@ -120,3 +120,25 @@ func (r *ReactionRepository) GetReactionsByCommentWithUser(commentID string) ([]
 	}
 	return reactions, nil
 }
+
+// GetReactionType returns the reaction type for a user on a given target or 0 if none exists
+func (r *ReactionRepository) GetReactionType(userID, targetType, targetID string) (int, error) {
+	switch targetType {
+	case "post":
+		var t int
+		err := r.db.QueryRow(`SELECT reaction_type FROM reactions WHERE user_id = ? AND post_id = ?`, userID, targetID).Scan(&t)
+		if err == sql.ErrNoRows {
+			return 0, nil
+		}
+		return t, err
+	case "comment":
+		var t int
+		err := r.db.QueryRow(`SELECT reaction_type FROM reactions WHERE user_id = ? AND comment_id = ?`, userID, targetID).Scan(&t)
+		if err == sql.ErrNoRows {
+			return 0, nil
+		}
+		return t, err
+	default:
+		return 0, errors.New("invalid target type")
+	}
+}

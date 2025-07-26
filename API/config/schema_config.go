@@ -106,3 +106,19 @@ const CreateOAuthTable = `CREATE TABLE IF NOT EXISTS oauth_accounts (
     -- Foreign key to link with existing user
     FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
 );`
+
+// Notifications table
+const CreateNotificationsTable = `CREATE TABLE IF NOT EXISTS notifications (
+        notification_id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        post_id TEXT,
+        comment_id TEXT,
+        type TEXT NOT NULL,
+        message TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        read_at TIMESTAMP,
+        deleted_at TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
+        FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+        FOREIGN KEY (comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE
+    );`
