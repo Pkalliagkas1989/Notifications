@@ -39,6 +39,16 @@ func NewPostRepository(db *sql.DB) *PostRepository {
 	return &PostRepository{db: db}
 }
 
+// GetAuthorID returns the user_id of the author for the given post
+func (r *PostRepository) GetAuthorID(postID string) (string, error) {
+	var userID string
+	err := r.db.QueryRow(`SELECT user_id FROM posts WHERE post_id = ?`, postID).Scan(&userID)
+	if err != nil {
+		return "", err
+	}
+	return userID, nil
+}
+
 func (r *PostRepository) GetAllPosts() ([]models.Post, error) {
 	rows, err := r.db.Query(`
 		SELECT post_id, user_id, title, content, created_at, updated_at
@@ -191,7 +201,6 @@ func (r *PostRepository) GetCategoriesByPostID(postID string) ([]models.Category
 // 	}
 // 	return posts, nil
 // }
-
 
 func (r *PostRepository) GetPostsReactedByUser(userID string) ([]models.PostWithUser, error) {
 	query := `

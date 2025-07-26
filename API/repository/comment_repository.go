@@ -60,3 +60,14 @@ func (r *CommentRepository) SoftDeleteComment(commentID string) error {
 	_, err := r.db.Exec(`UPDATE comments SET content = NULL, updated_at = ? WHERE comment_id = ?`, time.Now(), commentID)
 	return err
 }
+
+// GetByID returns a comment by its ID
+func (r *CommentRepository) GetByID(commentID string) (*models.Comment, error) {
+	var c models.Comment
+	err := r.db.QueryRow(`SELECT comment_id, post_id, user_id, content, created_at, updated_at FROM comments WHERE comment_id = ?`, commentID).
+		Scan(&c.ID, &c.PostID, &c.UserID, &c.Content, &c.CreatedAt, &c.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
