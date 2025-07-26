@@ -24,7 +24,14 @@ func (r *Repository) Create(n models.Notification) (*models.Notification, error)
 }
 
 func (r *Repository) GetByUser(userID string) ([]models.Notification, error) {
-	rows, err := r.db.Query(`SELECT notification_id, user_id, actor_id, post_id, comment_id, type, message, created_at, read_at, updated_at FROM notifications WHERE user_id = ? ORDER BY created_at DESC`, userID)
+	rows, err := r.db.Query(`SELECT n.notification_id, n.user_id, n.actor_id, n.post_id, n.comment_id, n.type, n.message,
+                p.title, c.content,
+                n.created_at, n.read_at, n.updated_at
+                FROM notifications n
+                LEFT JOIN posts p ON n.post_id = p.post_id
+                LEFT JOIN comments c ON n.comment_id = c.comment_id
+                WHERE n.user_id = ?
+                ORDER BY n.created_at DESC`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +39,17 @@ func (r *Repository) GetByUser(userID string) ([]models.Notification, error) {
 	var ns []models.Notification
 	for rows.Next() {
 		var n models.Notification
-		if err := rows.Scan(&n.ID, &n.UserID, &n.ActorID, &n.PostID, &n.CommentID, &n.Type, &n.Message, &n.CreatedAt, &n.ReadAt, &n.UpdatedAt); err != nil {
+		var title, content *string
+		if err := rows.Scan(&n.ID, &n.UserID, &n.ActorID, &n.PostID, &n.CommentID, &n.Type, &n.Message, &title, &content, &n.CreatedAt, &n.ReadAt, &n.UpdatedAt); err != nil {
 			return nil, err
+		}
+		n.PostTitle = title
+		if content != nil {
+			snippet := *content
+			if len(snippet) > 50 {
+				snippet = snippet[:50]
+			}
+			n.CommentSnippet = &snippet
 		}
 		ns = append(ns, n)
 	}

@@ -188,11 +188,29 @@ body, html {
 }
 
 .notification-item {
-  padding: 0.5em 0;
-  border-bottom: 1px solid var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  background: var(--bg-tertiary);
+  padding: 0.8em 1em;
+  border-radius: 8px;
+  margin-bottom: 0.5em;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .notification-item.unread {
-  font-weight: bold;
+  border-left: 4px solid var(--color-accent);
+}
+.notification-icon {
+  font-size: 1.2em;
+}
+.notif-link {
+  flex: 1;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.notif-time {
+  font-size: 0.8em;
+  color: var(--text-muted);
 }
 .notif-actions {
   margin-top: 1em;

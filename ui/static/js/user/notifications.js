@@ -23,10 +23,47 @@ function render(nots) {
     const div = document.createElement('div');
     div.className = 'notification-item';
     if (!n.read_at && n.message) div.classList.add('unread');
-    div.textContent = n.message || '(deleted)';
     div.dataset.id = n.id;
+
+    const icon = document.createElement('span');
+    icon.className = 'notification-icon';
+    icon.textContent = getIcon(n.type);
+
+    const link = document.createElement('a');
+    link.className = 'notif-link';
+    link.textContent = n.message || '(deleted)';
+    if (n.post_id) {
+      let url = `/user/post?id=${encodeURIComponent(n.post_id)}`;
+      if (n.comment_id) url += `#${encodeURIComponent(n.comment_id)}`;
+      link.href = url;
+    } else {
+      link.href = '#';
+    }
+
+    const time = document.createElement('time');
+    time.className = 'notif-time';
+    time.textContent = new Date(n.created_at).toLocaleString();
+
+    div.appendChild(icon);
+    div.appendChild(link);
+    div.appendChild(time);
     list.appendChild(div);
   });
+}
+
+function getIcon(type) {
+  switch (type) {
+    case 'comment':
+      return '💬';
+    case 'comment_edit':
+      return '✏️';
+    case 'comment_delete':
+      return '❌';
+    case 'reaction':
+      return '👍';
+    default:
+      return '🔔';
+  }
 }
 
 bell?.addEventListener('click', () => {
