@@ -1,20 +1,33 @@
-const bell = document.getElementById("notif-bell");
-const modal = document.getElementById("notification-modal");
-const list = document.getElementById("notif-list");
-const badge = document.getElementById("notif-count");
-const markAllBtn = document.getElementById("mark-all-read");
-const delAllBtn = document.getElementById("delete-all");
-const closeBtn = document.getElementById("close-notifications");
-const loadMoreBtn = document.getElementById("load-more-notifs");
 
-let offset = 0;
-const limit = 20;
-async function loadNotifications(reset = false) {
-  if (reset) {
-    offset = 0;
-    list.innerHTML = "";
+const bell = document.getElementById('notif-bell');
+const modal = document.getElementById('notification-modal');
+const list = document.getElementById('notif-list');
+const badge = document.getElementById('notif-count');
+const markAllBtn = document.getElementById('mark-all-read');
+const delAllBtn = document.getElementById('delete-all');
+const closeBtn = document.getElementById('close-notifications');
+
+// Hold CSRF token for requests to the API
+let csrfToken = null;
+
+// Endpoint used to verify the session and retrieve a CSRF token
+const sessionVerifyURL = 'http://localhost:8080/forum/api/session/verify';
+
+async function loadCSRFToken() {
+  if (csrfToken) return csrfToken;
+  try {
+    const resp = await fetch(sessionVerifyURL, { credentials: 'include' });
+    if (!resp.ok) throw new Error('session invalid');
+    const data = await resp.json();
+    csrfToken = data.csrf_token || data.CSRFToken;
+    return csrfToken;
+  } catch (err) {
+    console.warn('Failed to load CSRF token', err);
+    return null;
   }
+}
 
+async function loadNotifications() {
   try {
     const resp = await fetch(
       `http://localhost:8080/forum/api/user/notifications?limit=${limit}&offset=${offset}`,
@@ -106,30 +119,44 @@ closeBtn?.addEventListener("click", () => {
   modal.classList.add("hidden");
 });
 
-list?.addEventListener("click", async (e) => {
-  const id = e.target.dataset.id;
+
+list?.addEventListener('click', async (e) => {
+  const item = e.target.closest('.notification-item');
+  const id = item?.dataset.id;
   if (!id) return;
+  const token = await loadCSRFToken();
   await fetch(`http://localhost:8080/forum/api/notifications/read/${id}`, {
-    method: "POST",
-    credentials: "include",
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'X-CSRF-Token': token || ''
+    }
   });
-  await loadNotifications(true);
+  await loadNotifications();
 });
 
-markAllBtn?.addEventListener("click", async () => {
-  await fetch("http://localhost:8080/forum/api/notifications/read-all", {
-    method: "POST",
-    credentials: "include",
+markAllBtn?.addEventListener('click', async () => {
+  const token = await loadCSRFToken();
+  await fetch('http://localhost:8080/forum/api/notifications/read-all', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'X-CSRF-Token': token || ''
+    }
   });
-  await loadNotifications(true);
+  await loadNotifications();
 });
 
-delAllBtn?.addEventListener("click", async () => {
-  await fetch("http://localhost:8080/forum/api/notifications/delete-all", {
-    method: "DELETE",
-    credentials: "include",
+delAllBtn?.addEventListener('click', async () => {
+  const token = await loadCSRFToken();
+  await fetch('http://localhost:8080/forum/api/notifications/delete-all', {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'X-CSRF-Token': token || ''
+    }
   });
-  await loadNotifications(true);
+  await loadNotifications();
 });
 
 loadMoreBtn?.addEventListener("click", () => loadNotifications(false));
