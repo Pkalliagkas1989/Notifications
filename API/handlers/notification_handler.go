@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"forum/middleware"
 	nrepo "forum/repository/notification"
@@ -20,7 +21,18 @@ func (h *NotificationHandler) GetUserNotifications(w http.ResponseWriter, r *htt
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	notes, err := h.Repo.GetByUser(user.ID)
+
+	q := r.URL.Query()
+	limit, err := strconv.Atoi(q.Get("limit"))
+	if err != nil || limit <= 0 {
+		limit = 20
+	}
+	offset, err := strconv.Atoi(q.Get("offset"))
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	notes, err := h.Repo.GetByUser(user.ID, limit, offset)
 	if err != nil {
 		utils.ErrorResponse(w, "failed to load notifications", http.StatusInternalServerError)
 		return

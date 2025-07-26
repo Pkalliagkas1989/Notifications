@@ -37,9 +37,21 @@
         <li class="activity-dropdown-toggle">
           My Activity <span class="dropdown-arrow">&#9662;</span>
           <ul class="activity-dropdown-content">
-            <li><a href="/user/my-activity/my-posts" id="my-posts-link">My Posts</a></li>
-            <li><a href="/user/my-activity/my-comments" id="commented-posts-link">My Comments</a></li>
-            <li><a href="/user/my-activity/my-reactions" id="my-reactions-link">My Reactions</a></li>
+            <li>
+              <a href="/user/my-activity/my-posts" id="my-posts-link"
+                >My Posts</a
+              >
+            </li>
+            <li>
+              <a href="/user/my-activity/my-comments" id="commented-posts-link"
+                >My Comments</a
+              >
+            </li>
+            <li>
+              <a href="/user/my-activity/my-reactions" id="my-reactions-link"
+                >My Reactions</a
+              >
+            </li>
           </ul>
         </li>
       </ul>
@@ -127,6 +139,7 @@
         <button class="close-btn" id="close-notifications">&times;</button>
         <h2>Notifications</h2>
         <div id="notif-list"></div>
+        <button id="load-more-notifs" class="hidden">Load more</button>
         <div class="notif-actions">
           <button id="mark-all-read">Read All</button>
           <button id="delete-all">Delete All</button>
