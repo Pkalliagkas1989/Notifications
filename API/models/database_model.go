@@ -14,7 +14,7 @@ import (
 
 // Database version constants
 const (
-	CURRENT_DB_VERSION = 5 // Updated to version 5 for nullable post/comment fields
+	CURRENT_DB_VERSION = 6 // Updated to version 6 for notifications composite index
 	INITIAL_VERSION    = 1
 )
 
@@ -75,6 +75,13 @@ func GetMigrations() []Migration {
 				// 4. Rename new table
 				// Here, we just add a comment for manual migration
 				"-- Manual migration required: Make posts.title, posts.content, comments.content nullable.",
+			},
+		},
+		{
+			Version:     6,
+			Description: "Add composite index on notifications(user_id, created_at)",
+			SQL: []string{
+				config.IdxNotificationsUserCreated,
 			},
 		},
 		// Add future migrations here
@@ -388,6 +395,7 @@ func createIndexes(db *sql.DB) error {
 		config.IdxReactionsPostID,
 		config.IdxReactionsCommentID,
 		config.IdxImagesPostID,
+		config.IdxNotificationsUserCreated,
 		// OAuth indexes
 		`CREATE INDEX IF NOT EXISTS idx_oauth_provider_user ON oauth_accounts(provider, provider_user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_oauth_user_id ON oauth_accounts(user_id)`,

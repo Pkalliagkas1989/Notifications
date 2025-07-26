@@ -13,6 +13,9 @@ const IdxImagesPostID = `CREATE INDEX IF NOT EXISTS idx_images_post_id ON images
 // Index for notifications table
 const IdxNotificationsUserID = `CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);`
 
+// Composite index for faster retrieval of notifications by user and creation time
+const IdxNotificationsUserCreated = `CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_id, created_at);`
+
 // -- Index for faster lookups by provider and provider_user_id
 const CreateOAuthIndexes = `
 		CREATE INDEX IF NOT EXISTS idx_oauth_provider_user 
