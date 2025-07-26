@@ -130,6 +130,15 @@ See `instructions.md` for more API usage examples.
 - CORS enabled for frontend-backend communication
 - Session management with secure cookies
 
+## Database Migration Notes
+
+If you're upgrading an existing database, the old index `idx_notifications_user_id`
+is no longer used. You can safely drop it with:
+
+```sql
+DROP INDEX IF EXISTS idx_notifications_user_id;
+```
+
 ---
 
 ## Contributing

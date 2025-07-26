@@ -58,7 +58,6 @@ func GetMigrations() []Migration {
 			SQL: []string{
 				config.CreateImagesTable,
 				config.IdxImagesPostID,
-				config.IdxNotificationsUserID,
 			},
 		},
 		{
