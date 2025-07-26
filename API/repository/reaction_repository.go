@@ -11,6 +11,23 @@ type ReactionRepository struct {
 	db *sql.DB
 }
 
+func (r *ReactionRepository) GetReaction(userID, targetType, targetID string) (int, error) {
+	var reactionType int
+	var err error
+	switch targetType {
+	case "post":
+		err = r.db.QueryRow(`SELECT reaction_type FROM reactions WHERE user_id = ? AND post_id = ?`, userID, targetID).Scan(&reactionType)
+	case "comment":
+		err = r.db.QueryRow(`SELECT reaction_type FROM reactions WHERE user_id = ? AND comment_id = ?`, userID, targetID).Scan(&reactionType)
+	default:
+		return 0, errors.New("invalid target type")
+	}
+	if err == sql.ErrNoRows {
+		return 0, nil
+	}
+	return reactionType, err
+}
+
 func NewReactionRepository(db *sql.DB) *ReactionRepository {
 	return &ReactionRepository{db: db}
 }

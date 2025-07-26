@@ -7,17 +7,22 @@ import (
 	"forum/middleware"
 	"forum/models"
 	"forum/repository"
+	nrepo "forum/repository/notification"
+	"forum/repository/user"
 	"forum/utils"
 )
 
 // CommentHandler handles comment related endpoints
 type CommentHandler struct {
-	CommentRepo *repository.CommentRepository
+	CommentRepo      *repository.CommentRepository
+	PostRepo         *repository.PostRepository
+	NotificationRepo *nrepo.Repository
+	UserRepo         *user.UserRepository
 }
 
 // NewCommentHandler creates a new CommentHandler
-func NewCommentHandler(repo *repository.CommentRepository) *CommentHandler {
-	return &CommentHandler{CommentRepo: repo}
+func NewCommentHandler(repo *repository.CommentRepository, postRepo *repository.PostRepository, nRepo *nrepo.Repository, uRepo *user.UserRepository) *CommentHandler {
+	return &CommentHandler{CommentRepo: repo, PostRepo: postRepo, NotificationRepo: nRepo, UserRepo: uRepo}
 }
 
 // CreateComment creates a new comment on a post for the authenticated user
@@ -58,6 +63,14 @@ func (h *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if ownerID, err := h.PostRepo.GetPostOwner(req.PostID); err == nil && ownerID != user.ID {
+		if actor, err2 := h.UserRepo.GetByID(user.ID); err2 == nil {
+			msg := actor.Username + " commented on your post"
+			n := models.Notification{UserID: ownerID, ActorID: user.ID, PostID: &req.PostID, CommentID: &created.ID, Type: "comment", Message: &msg}
+			h.NotificationRepo.Create(n)
+		}
+	}
+
 	utils.JSONResponse(w, created, http.StatusCreated)
 }
 
@@ -92,6 +105,16 @@ func (h *CommentHandler) EditComment(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorResponse(w, "Failed to update comment", http.StatusInternalServerError)
 		return
 	}
+
+	if c, err := h.CommentRepo.GetByID(commentID); err == nil {
+		if ownerID, err2 := h.PostRepo.GetPostOwner(c.PostID); err2 == nil && ownerID != user.ID {
+			if actor, err3 := h.UserRepo.GetByID(user.ID); err3 == nil {
+				msg := actor.Username + " edited a comment on your post"
+				n := models.Notification{UserID: ownerID, ActorID: user.ID, PostID: &c.PostID, CommentID: &c.ID, Type: "comment_edit", Message: &msg}
+				h.NotificationRepo.Create(n)
+			}
+		}
+	}
 	utils.JSONResponse(w, map[string]string{"status": "updated"}, http.StatusOK)
 }
 
@@ -114,6 +137,16 @@ func (h *CommentHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	if err := h.CommentRepo.SoftDeleteComment(commentID); err != nil {
 		utils.ErrorResponse(w, "Failed to delete comment", http.StatusInternalServerError)
 		return
+	}
+
+	if c, err := h.CommentRepo.GetByID(commentID); err == nil {
+		if ownerID, err2 := h.PostRepo.GetPostOwner(c.PostID); err2 == nil && ownerID != user.ID {
+			if actor, err3 := h.UserRepo.GetByID(user.ID); err3 == nil {
+				msg := actor.Username + " deleted a comment on your post"
+				n := models.Notification{UserID: ownerID, ActorID: user.ID, PostID: &c.PostID, CommentID: &c.ID, Type: "comment_delete", Message: &msg}
+				h.NotificationRepo.Create(n)
+			}
+		}
 	}
 	utils.JSONResponse(w, map[string]string{"status": "deleted"}, http.StatusOK)
 }

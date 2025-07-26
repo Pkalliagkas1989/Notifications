@@ -58,6 +58,7 @@ func GetMigrations() []Migration {
 			SQL: []string{
 				config.CreateImagesTable,
 				config.IdxImagesPostID,
+				config.IdxNotificationsUserID,
 			},
 		},
 		{
@@ -183,7 +184,7 @@ func getDatabaseVersion(db *sql.DB) (int, error) {
 				}
 				return INITIAL_VERSION, nil
 			}
-			return 0, nil  // No version and no existing user table, implies brand new DB
+			return 0, nil // No version and no existing user table, implies brand new DB
 		}
 		return 0, fmt.Errorf("failed to get database version: %v", err)
 	}
@@ -283,13 +284,13 @@ func runMigrations(db *sql.DB) error {
 	if len(pending) == 0 && currentVersion == CURRENT_DB_VERSION {
 		fmt.Printf("Database is up to date (version %d)\n", currentVersion)
 		return nil
-		} else if len(pending) == 0 && currentVersion < CURRENT_DB_VERSION {
-			// This case means there are no migrations defined beyond the current version
-			// but the current version is not yet the latest expected version.
-			// This can happen if CURRENT_DB_VERSION constant is updated, but no
-			// corresponding migration is added to GetMigrations().
-			fmt.Printf("Warning: Database version (%d) is not at the latest expected version (%d), but no pending migrations found.\n", currentVersion, CURRENT_DB_VERSION)
-			return nil
+	} else if len(pending) == 0 && currentVersion < CURRENT_DB_VERSION {
+		// This case means there are no migrations defined beyond the current version
+		// but the current version is not yet the latest expected version.
+		// This can happen if CURRENT_DB_VERSION constant is updated, but no
+		// corresponding migration is added to GetMigrations().
+		fmt.Printf("Warning: Database version (%d) is not at the latest expected version (%d), but no pending migrations found.\n", currentVersion, CURRENT_DB_VERSION)
+		return nil
 	}
 
 	fmt.Printf("Running %d migration(s)...\n", len(pending))
@@ -350,6 +351,7 @@ func createTables(db *sql.DB) error {
 		config.CreateImagesTable,
 		config.CreatePostCategoriesTable,
 		config.CreateOAuthTable,
+		config.CreateNotificationsTable,
 		// Add OAuth state table for new installations
 		`CREATE TABLE IF NOT EXISTS oauth_states (
 			state TEXT PRIMARY KEY,
