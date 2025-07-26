@@ -6,6 +6,26 @@ const markAllBtn = document.getElementById('mark-all-read');
 const delAllBtn = document.getElementById('delete-all');
 const closeBtn = document.getElementById('close-notifications');
 
+// Hold CSRF token for requests to the API
+let csrfToken = null;
+
+// Endpoint used to verify the session and retrieve a CSRF token
+const sessionVerifyURL = 'http://localhost:8080/forum/api/session/verify';
+
+async function loadCSRFToken() {
+  if (csrfToken) return csrfToken;
+  try {
+    const resp = await fetch(sessionVerifyURL, { credentials: 'include' });
+    if (!resp.ok) throw new Error('session invalid');
+    const data = await resp.json();
+    csrfToken = data.csrf_token || data.CSRFToken;
+    return csrfToken;
+  } catch (err) {
+    console.warn('Failed to load CSRF token', err);
+    return null;
+  }
+}
+
 async function loadNotifications() {
   try {
     const resp = await fetch('http://localhost:8080/forum/api/user/notifications', { credentials: 'include' });
@@ -79,19 +99,41 @@ bell?.addEventListener('click', () => {
 closeBtn?.addEventListener('click', () => { modal.classList.add('hidden'); });
 
 list?.addEventListener('click', async (e) => {
-  const id = e.target.dataset.id;
+  const item = e.target.closest('.notification-item');
+  const id = item?.dataset.id;
   if (!id) return;
-  await fetch(`http://localhost:8080/forum/api/notifications/read/${id}`, { method: 'POST', credentials: 'include' });
+  const token = await loadCSRFToken();
+  await fetch(`http://localhost:8080/forum/api/notifications/read/${id}`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'X-CSRF-Token': token || ''
+    }
+  });
   await loadNotifications();
 });
 
 markAllBtn?.addEventListener('click', async () => {
-  await fetch('http://localhost:8080/forum/api/notifications/read-all', { method:'POST', credentials:'include' });
+  const token = await loadCSRFToken();
+  await fetch('http://localhost:8080/forum/api/notifications/read-all', {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'X-CSRF-Token': token || ''
+    }
+  });
   await loadNotifications();
 });
 
 delAllBtn?.addEventListener('click', async () => {
-  await fetch('http://localhost:8080/forum/api/notifications/delete-all', { method:'DELETE', credentials:'include' });
+  const token = await loadCSRFToken();
+  await fetch('http://localhost:8080/forum/api/notifications/delete-all', {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'X-CSRF-Token': token || ''
+    }
+  });
   await loadNotifications();
 });
 
