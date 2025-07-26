@@ -11,6 +11,27 @@ type ReactionRepository struct {
 	db *sql.DB
 }
 
+// GetReaction returns the reaction type a user has for a given target, or 0 if none
+func (r *ReactionRepository) GetReaction(userID, targetType, targetID string) (int, error) {
+	var reaction int
+	var err error
+	switch targetType {
+	case "post":
+		err = r.db.QueryRow(`SELECT reaction_type FROM reactions WHERE user_id = ? AND post_id = ?`, userID, targetID).Scan(&reaction)
+		if err == sql.ErrNoRows {
+			return 0, nil
+		}
+		return reaction, err
+	case "comment":
+		err = r.db.QueryRow(`SELECT reaction_type FROM reactions WHERE user_id = ? AND comment_id = ?`, userID, targetID).Scan(&reaction)
+		if err == sql.ErrNoRows {
+			return 0, nil
+		}
+		return reaction, err
+	}
+	return 0, errors.New("invalid target type")
+}
+
 func NewReactionRepository(db *sql.DB) *ReactionRepository {
 	return &ReactionRepository{db: db}
 }
