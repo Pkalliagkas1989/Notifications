@@ -101,6 +101,15 @@ func (h *CommentHandler) EditComment(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorResponse(w, "Nothing to update", http.StatusBadRequest)
 		return
 	}
+	ownerID, err := h.CommentRepo.GetCommentOwner(commentID)
+	if err != nil {
+		utils.ErrorResponse(w, "Comment not found", http.StatusNotFound)
+		return
+	}
+	if ownerID != user.ID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	if err := h.CommentRepo.UpdateComment(commentID, req.Content); err != nil {
 		utils.ErrorResponse(w, "Failed to update comment", http.StatusInternalServerError)
 		return
@@ -132,6 +141,15 @@ func (h *CommentHandler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	commentID := utils.GetLastPathParam(r)
 	if commentID == "" {
 		utils.ErrorResponse(w, "Missing comment ID", http.StatusBadRequest)
+		return
+	}
+	ownerID, err := h.CommentRepo.GetCommentOwner(commentID)
+	if err != nil {
+		utils.ErrorResponse(w, "Comment not found", http.StatusNotFound)
+		return
+	}
+	if ownerID != user.ID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 	if err := h.CommentRepo.SoftDeleteComment(commentID); err != nil {

@@ -34,24 +34,24 @@ func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-    CategoryIDs []int  `json:"category_ids"` // Instead of CategoryID
-    Title       string `json:"title"`
-    Content     string `json:"content"`
-}
+		CategoryIDs []int  `json:"category_ids"` // Instead of CategoryID
+		Title       string `json:"title"`
+		Content     string `json:"content"`
+	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.ErrorResponse(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 	if len(req.CategoryIDs) == 0 || req.Title == "" || req.Content == "" {
-    utils.ErrorResponse(w, "At least one category, title and content are required", http.StatusBadRequest)
-    return
-}
+		utils.ErrorResponse(w, "At least one category, title and content are required", http.StatusBadRequest)
+		return
+	}
 
 	post := models.Post{
-		UserID:     user.ID,
-		Title:      &req.Title,
-		Content:    &req.Content,
+		UserID:  user.ID,
+		Title:   &req.Title,
+		Content: &req.Content,
 	}
 
 	created, err := h.PostRepo.Create(post, req.CategoryIDs)
@@ -90,6 +90,15 @@ func (h *PostHandler) EditPostTitle(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorResponse(w, "Title is required", http.StatusBadRequest)
 		return
 	}
+	ownerID, err := h.PostRepo.GetPostOwner(postID)
+	if err != nil {
+		utils.ErrorResponse(w, "Post not found", http.StatusNotFound)
+		return
+	}
+	if ownerID != user.ID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	if err := h.PostRepo.UpdatePost(postID, req.Title, nil); err != nil {
 		utils.ErrorResponse(w, "Failed to update title", http.StatusInternalServerError)
 		return
@@ -124,6 +133,15 @@ func (h *PostHandler) EditPostContent(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorResponse(w, "Content is required", http.StatusBadRequest)
 		return
 	}
+	ownerID, err := h.PostRepo.GetPostOwner(postID)
+	if err != nil {
+		utils.ErrorResponse(w, "Post not found", http.StatusNotFound)
+		return
+	}
+	if ownerID != user.ID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	if err := h.PostRepo.UpdatePost(postID, nil, req.Content); err != nil {
 		utils.ErrorResponse(w, "Failed to update content", http.StatusInternalServerError)
 		return
@@ -145,6 +163,15 @@ func (h *PostHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
 	postID := utils.GetLastPathParam(r)
 	if postID == "" {
 		utils.ErrorResponse(w, "Missing post ID", http.StatusBadRequest)
+		return
+	}
+	ownerID, err := h.PostRepo.GetPostOwner(postID)
+	if err != nil {
+		utils.ErrorResponse(w, "Post not found", http.StatusNotFound)
+		return
+	}
+	if ownerID != user.ID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 	if err := h.PostRepo.SoftDeletePost(postID); err != nil {
