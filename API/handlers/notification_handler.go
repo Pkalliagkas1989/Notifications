@@ -43,7 +43,16 @@ func (h *NotificationHandler) MarkRead(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorResponse(w, "missing id", http.StatusBadRequest)
 		return
 	}
-	if err := h.Repo.MarkRead(id); err != nil {
+	n, err := h.Repo.GetByID(id)
+	if err != nil {
+		utils.ErrorResponse(w, "not found", http.StatusNotFound)
+		return
+	}
+	if n.UserID != user.ID {
+		utils.ErrorResponse(w, "forbidden", http.StatusForbidden)
+		return
+	}
+	if err := h.Repo.MarkRead(id, user.ID); err != nil {
 		utils.ErrorResponse(w, "failed", http.StatusInternalServerError)
 		return
 	}
@@ -82,7 +91,16 @@ func (h *NotificationHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorResponse(w, "missing id", http.StatusBadRequest)
 		return
 	}
-	if err := h.Repo.SoftDelete(id); err != nil {
+	n, err := h.Repo.GetByID(id)
+	if err != nil {
+		utils.ErrorResponse(w, "not found", http.StatusNotFound)
+		return
+	}
+	if n.UserID != user.ID {
+		utils.ErrorResponse(w, "forbidden", http.StatusForbidden)
+		return
+	}
+	if err := h.Repo.SoftDelete(id, user.ID); err != nil {
 		utils.ErrorResponse(w, "failed", http.StatusInternalServerError)
 		return
 	}

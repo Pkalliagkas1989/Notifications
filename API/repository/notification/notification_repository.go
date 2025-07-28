@@ -23,6 +23,17 @@ func (r *Repository) Create(n models.Notification) (*models.Notification, error)
 	return &n, nil
 }
 
+// GetByID fetches a single notification by its ID
+func (r *Repository) GetByID(id string) (*models.Notification, error) {
+	var n models.Notification
+	err := r.db.QueryRow(`SELECT notification_id, user_id, actor_id, post_id, comment_id, type, message, created_at, read_at, updated_at FROM notifications WHERE notification_id = ?`, id).
+		Scan(&n.ID, &n.UserID, &n.ActorID, &n.PostID, &n.CommentID, &n.Type, &n.Message, &n.CreatedAt, &n.ReadAt, &n.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &n, nil
+}
+
 func (r *Repository) GetByUser(userID string) ([]models.Notification, error) {
 	rows, err := r.db.Query(`SELECT n.notification_id, n.user_id, n.actor_id, n.post_id, n.comment_id, n.type, n.message,
                 p.title, c.content,
@@ -56,8 +67,8 @@ func (r *Repository) GetByUser(userID string) ([]models.Notification, error) {
 	return ns, nil
 }
 
-func (r *Repository) MarkRead(id string) error {
-	_, err := r.db.Exec(`UPDATE notifications SET read_at = ? WHERE notification_id = ?`, time.Now(), id)
+func (r *Repository) MarkRead(id, userID string) error {
+	_, err := r.db.Exec(`UPDATE notifications SET read_at = ? WHERE notification_id = ? AND user_id = ?`, time.Now(), id, userID)
 	return err
 }
 
@@ -66,8 +77,8 @@ func (r *Repository) MarkAllRead(userID string) error {
 	return err
 }
 
-func (r *Repository) SoftDelete(id string) error {
-	_, err := r.db.Exec(`UPDATE notifications SET message = NULL, updated_at = ? WHERE notification_id = ?`, time.Now(), id)
+func (r *Repository) SoftDelete(id, userID string) error {
+	_, err := r.db.Exec(`UPDATE notifications SET message = NULL, updated_at = ? WHERE notification_id = ? AND user_id = ?`, time.Now(), id, userID)
 	return err
 }
 
