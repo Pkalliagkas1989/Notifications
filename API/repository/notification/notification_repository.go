@@ -25,13 +25,13 @@ func (r *Repository) Create(n models.Notification) (*models.Notification, error)
 
 func (r *Repository) GetByUser(userID string) ([]models.Notification, error) {
 	rows, err := r.db.Query(`SELECT n.notification_id, n.user_id, n.actor_id, n.post_id, n.comment_id, n.type, n.message,
-               p.title, c.content,
-               n.created_at, n.read_at, n.updated_at
-               FROM notifications n
-               LEFT JOIN posts p ON n.post_id = p.post_id
-               LEFT JOIN comments c ON n.comment_id = c.comment_id
-               WHERE n.user_id = ? AND n.message IS NOT NULL
-               ORDER BY n.created_at DESC`, userID)
+                p.title, c.content,
+                n.created_at, n.read_at, n.updated_at
+                FROM notifications n
+                LEFT JOIN posts p ON n.post_id = p.post_id
+                LEFT JOIN comments c ON n.comment_id = c.comment_id
+                WHERE n.user_id = ?
+                ORDER BY n.created_at DESC`, userID)
 	if err != nil {
 		return nil, err
 	}
