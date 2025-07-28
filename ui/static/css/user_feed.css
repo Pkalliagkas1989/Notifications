@@ -231,3 +231,14 @@ body, html {
   display: flex;
   gap: 1em;
 }
+
+/* Limit notification modal height to show latest items with internal scroll */
+#notification-modal .modal-content {
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+#notif-list {
+  max-height: 400px; /* roughly 10 items */
+  overflow-y: auto;
+}

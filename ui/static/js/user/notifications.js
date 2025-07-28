@@ -122,6 +122,11 @@ markAllBtn?.addEventListener('click', async () => {
       'X-CSRF-Token': token || ''
     }
   });
+  bell.classList.remove('lit');
+  if (badge) {
+    badge.textContent = '0';
+    badge.classList.add('hidden');
+  }
   await loadNotifications();
 });
 
@@ -134,6 +139,12 @@ delAllBtn?.addEventListener('click', async () => {
       'X-CSRF-Token': token || ''
     }
   });
+  list.innerHTML = 'No notifications';
+  bell.classList.remove('lit');
+  if (badge) {
+    badge.textContent = '0';
+    badge.classList.add('hidden');
+  }
   await loadNotifications();
 });
 
