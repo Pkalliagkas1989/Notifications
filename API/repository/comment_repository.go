@@ -11,6 +11,12 @@ type CommentRepository struct {
 	db *sql.DB
 }
 
+func (r *CommentRepository) GetCommentOwner(commentID string) (string, error) {
+	var userID string
+	err := r.db.QueryRow(`SELECT user_id FROM comments WHERE comment_id = ?`, commentID).Scan(&userID)
+	return userID, err
+}
+
 func (r *CommentRepository) GetByID(id string) (*models.Comment, error) {
 	var c models.Comment
 	err := r.db.QueryRow(`SELECT comment_id, post_id, user_id, content, created_at, updated_at FROM comments WHERE comment_id = ?`, id).
