@@ -31,9 +31,8 @@ async function loadNotifications() {
     const resp = await fetch('http://localhost:8080/forum/api/user/notifications', { credentials: 'include' });
     if (!resp.ok) throw new Error('failed');
     const data = await resp.json();
-    const active = data.filter(n => n.message);
-    render(active);
-    const unreadCount = active.filter(n => !n.read_at).length;
+    render(data);
+    const unreadCount = data.filter(n => !n.read_at && n.message).length;
     const hasUnread = unreadCount > 0;
     bell.classList.toggle('lit', hasUnread);
     if (badge) {
