@@ -44,8 +44,9 @@ async function loadNotifications() {
 
 function render(nots) {
   list.innerHTML = '';
-  if (!nots.length) { list.textContent = 'No notifications'; return; }
-  nots.forEach(n => {
+  const valid = nots.filter(n => n.message);
+  if (!valid.length) { list.textContent = 'No notifications'; return; }
+  valid.forEach(n => {
     const div = document.createElement('div');
     div.className = 'notification-item';
     if (!n.read_at && n.message) div.classList.add('unread');
