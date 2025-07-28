@@ -62,6 +62,9 @@ function renderSinglePostWithEdit(post) {
 
     // --- Deleted post check ---
     const { isDeleted, displayTitle, displayContent } = getPostDisplayState(post);
+
+    // Only the owner of the post can edit/delete it
+    const isOwner = currentUserId && post.user_id == currentUserId;
     
     // --- Add Delete control ---
     const controls = document.createElement('div');
@@ -317,18 +320,18 @@ function renderSinglePostWithEdit(post) {
     postBox.className = 'post';
 
     postBox.appendChild(title);
-    if (!isDeleted) postBox.appendChild(titleEditBtn);
-         postBox.appendChild(meta);
-      if (imageEl) postBox.appendChild(imageEl);
-     if (imageEl && !isDeleted) postBox.appendChild(imageEditBtn);
+    if (!isDeleted && isOwner) postBox.appendChild(titleEditBtn);
+    postBox.appendChild(meta);
+    if (imageEl) postBox.appendChild(imageEl);
+    if (imageEl && !isDeleted && isOwner) postBox.appendChild(imageEditBtn);
     if (!isDeleted) {
         postBox.appendChild(postContentCard);
-        postBox.appendChild(contentEditBtn);
+        if (isOwner) postBox.appendChild(contentEditBtn);
         postBox.appendChild(commentFormContainer);
     }
     postBox.appendChild(reactions);
     postBox.appendChild(categoryEl);
-    if (!isDeleted) {
+    if (!isDeleted && isOwner) {
         postBox.appendChild(deleteBtn);
     }
     postBox.appendChild(commentSection);
