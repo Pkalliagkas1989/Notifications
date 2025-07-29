@@ -103,8 +103,6 @@ func SetupRoutes(db *sql.DB) http.Handler {
 	mux.Handle("/forum/api/user/notifications", protected(http.HandlerFunc(notificationHandler.GetUserNotifications)))
 	mux.Handle("/forum/api/notifications/read/", protected(http.HandlerFunc(notificationHandler.MarkRead))) // POST /forum/api/notifications/read/{id}
 	mux.Handle("/forum/api/notifications/read-all", protected(http.HandlerFunc(notificationHandler.MarkAllRead)))
-	mux.Handle("/forum/api/notifications/delete/", protected(http.HandlerFunc(notificationHandler.Delete))) // DELETE /forum/api/notifications/delete/{id}
-	mux.Handle("/forum/api/notifications/delete-all", protected(http.HandlerFunc(notificationHandler.DeleteAll)))
 
 	// Additional protected routes for user management
 	mux.Handle("/forum/api/user/profile", protected(http.HandlerFunc(authHandler.GetProfile)))

@@ -3,7 +3,7 @@ const modal = document.getElementById('notification-modal');
 const list = document.getElementById('notif-list');
 const badge = document.getElementById('notif-count');
 const markAllBtn = document.getElementById('mark-all-read');
-const delAllBtn = document.getElementById('delete-all');
+const clearAllBtn = document.getElementById('clear-all');
 const closeBtn = document.getElementById('close-notifications');
 
 // Hold CSRF token for requests to the API
@@ -131,22 +131,13 @@ markAllBtn?.addEventListener('click', async () => {
   await loadNotifications();
 });
 
-delAllBtn?.addEventListener('click', async () => {
-  const token = await loadCSRFToken();
-  await fetch('http://localhost:8080/forum/api/notifications/delete-all', {
-    method: 'DELETE',
-    credentials: 'include',
-    headers: {
-      'X-CSRF-Token': token || ''
-    }
-  });
+clearAllBtn?.addEventListener('click', async () => {
   list.innerHTML = 'No notifications';
   bell.classList.remove('lit');
   if (badge) {
     badge.textContent = '0';
     badge.classList.add('hidden');
   }
-  await loadNotifications();
 });
 
 window.addEventListener('DOMContentLoaded', loadNotifications);
